@@ -1,0 +1,37 @@
+- hosts: localhost
+  vars_files: aws_keys.yml
+  vars:
+          region: "us-east-1"
+          access: "{{ aws_access }}"
+          secret: "{{ aws_secret }}"
+          aws_key: "myansiblekey"
+          instance_type: "t2.micro"
+          ami: "ami-047a51fa27710816e"
+          vpc_subnet: "subnet-88a922ee"
+          security: "mysecurity" 
+          slave_count: "2"
+  tasks:
+  - ec2:
+            key_name: "{{ aws_key }}"
+            instance_type: "{{ instance_type }}"
+            image: "{{ ami }}"
+            wait: yes
+            wait_timeout: 500
+            group: "{{ security }}"
+            instance_tags:
+                    name: "{{ item.name }}"
+            count_tag:
+                    name: "{{ item.name }}"
+            exact_count: "{{ item.count }}"
+            vpc_subnet_id: "{{ vpc_subnet }}"
+            assign_public_ip: yes
+            region: "{{ region }}"
+            aws_access_key: "{{ access }}"
+            aws_secret_key: "{{ secret }}"
+    loop:
+            - {name: "k8s_Master", count: "1" }
+            - {name: "k8s_Slave", count: "{{ slave_count }}"}
+
+ 
+
+
